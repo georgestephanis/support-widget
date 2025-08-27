@@ -1,6 +1,17 @@
 <?php
 /**
- * Plugin name: Support Widget
+ * Plugin name:       Support Widget
+ * Description:       A support widget, enabling easier communication to dev agencies.
+ * Version:           0.1.0
+ * Requires at least: 6.7
+ * Requires PHP:      7.4
+ * Author:            George Stephanis
+ * License:           GPL-2.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       support-widget
+ * Domain Path:       /languages
+ *
+ * @package GeorgeStephanis\SupportWidget
  */
 
 namespace GeorgeStephanis\SupportWidget;
@@ -8,7 +19,7 @@ namespace GeorgeStephanis\SupportWidget;
 function setup_widget() {
     wp_add_dashboard_widget(
 		'gs_support-widget',
-		__( 'Support' ),
+		__( 'Support', 'support-widget' ),
 		__NAMESPACE__ . '\widget',
 		__NAMESPACE__ . '\widget_control'
 	);
@@ -36,11 +47,11 @@ add_action( 'wp_dashboard_setup', __NAMESPACE__ . '\setup_widget' );
 function get_to_options() {
 	$to = array(
 		'admin' => array(
-			'label' => __( 'Site Admin' ),
+			'label' => __( 'Site Admin', 'support-widget' ),
 			'to'    => get_option( 'admin_email' ),
 		),
 		'george' => array(
-			'label' => __( 'George' ),
+			'label' => __( 'George', 'support-widget' ),
 			'to'    => 'daljo628@gmail.com',
 		)
 	);
@@ -56,7 +67,7 @@ function widget() {
 		<input type="hidden" name="action" value="gs_contact-support" />
 		<?php wp_nonce_field( 'gs_contact-support', '_supportnonce' ); ?>
 		<label>
-			<?php esc_html_e( 'To:' ); ?>
+			<?php esc_html_e( 'To:', 'support-widget' ); ?>
 			<?php
 			if ( sizeof( $to_options ) < 2 ) {
 				$to_key     = key( $to_options );
@@ -69,7 +80,7 @@ function widget() {
 				);
 			} else {
 				echo '<select name="to" required>';
-				echo '<option value="">Select ...</option>';
+				echo '<option value="">' . esc_html__( 'Select …', 'support-widget' ) . '</option>';
 
 				foreach ( $to_options as $to_key => $to_details ) {
 					printf(
@@ -84,26 +95,26 @@ function widget() {
 			?>
 		</label>
 		<label>
-			<?php esc_html_e( 'Priority:' ); ?>
+			<?php esc_html_e( 'Priority:', 'support-widget' ); ?>
 			<select name="priority">
-				<option value="critical"><?php esc_html_e( 'CRITICAL' ); ?></option>
-				<option value="high"><?php esc_html_e( 'High' ); ?></option>
-				<option value="normal" selected><?php esc_html_e( 'Normal' ); ?></option>
-				<option value="low"><?php esc_html_e( 'Low' ); ?></option>
+				<option value="critical"><?php esc_html_e( 'CRITICAL', 'support-widget' ); ?></option>
+				<option value="high"><?php esc_html_e( 'High', 'support-widget' ); ?></option>
+				<option value="normal" selected><?php esc_html_e( 'Normal', 'support-widget' ); ?></option>
+				<option value="low"><?php esc_html_e( 'Low', 'support-widget' ); ?></option>
 			</select>
 		</label>
 		<label>
-			<?php esc_html_e( 'Message:' ); ?>
+			<?php esc_html_e( 'Message:', 'support-widget' ); ?>
 			<textarea name="message" style="width:100%; min-height:3em; field-sizing:content;" required></textarea>
 		</label>
 		<label>
 			<input type="checkbox" name="extra_data" value="true" checked />
-			<?php esc_html_e( 'Submit extra diagnostic data?' ); ?>
+			<?php esc_html_e( 'Submit extra diagnostic data?', 'support-widget' ); ?>
 		</label>
 		<input type="hidden" name="client" id="gs_support-widget__client" />
 		<?php
 		submit_button(
-			esc_html__( 'Send' )
+			esc_html__( 'Send', 'support-widget' )
 		);
 		?>
 	</form>
@@ -111,7 +122,7 @@ function widget() {
 }
 
 function widget_control() {
-	_e( 'Control Options...' );
+	_e( 'Control Options...', 'support-widget' );
 }
 
 function get_active_plugins() {
@@ -144,15 +155,15 @@ function get_extra_diagnostic_data() {
 
 	// Client Data:
 	$return['client']                   = isset( $_POST['client'] ) ? json_decode( $_POST['client'] ) : array();
-	$return['client']['user-agent']     = $_SERVER['HTTP_USER_AGENT'] ?? __( 'Unknown' );
-	$return['client']['remote-addr']    = $_SERVER['REMOTE_ADDR'] ?? __( 'Unknown' );
-	$return['client']['remote-host']    = $_SERVER['REMOTE_HOST'] ?? __( 'Unknown' );
+	$return['client']['user-agent']     = $_SERVER['HTTP_USER_AGENT'] ?? __( 'Unknown', 'support-widget' );
+	$return['client']['remote-addr']    = $_SERVER['REMOTE_ADDR'] ?? __( 'Unknown', 'support-widget' );
+	$return['client']['remote-host']    = $_SERVER['REMOTE_HOST'] ?? __( 'Unknown', 'support-widget' );
 
 	// Server Data:
 	$return['server']['wpurl']          = get_bloginfo( 'wpurl' );
 	$return['server']['wp-version']     = get_bloginfo( 'version' );
 	$return['server']['php-version']    = PHP_VERSION;
-	$return['server']['os']             = $_SERVER['SERVER_SIGNATURE'] ?? __( 'Unknown' );
+	$return['server']['os']             = $_SERVER['SERVER_SIGNATURE'] ?? __( 'Unknown', 'support-widget' );
 	$return['server']['is-https']       = is_ssl() ? 'https' : 'http';
 	$return['server']['language']       = get_bloginfo( 'language' );
 	$return['server']['charset']        = get_bloginfo( 'charset' );
@@ -220,7 +231,7 @@ function send_support_request() {
 	wp_mail(
 		sprintf( '%2$s', $to['label'], $to['to'] ),
 		sprintf(
-			__( '%1$s-Priority Support Request from %2$s at %3$s!' ),
+			__( '%1$s-Priority Support Request from %2$s at %3$s!', 'support-widget' ),
 			ucwords( $_POST['priority'] ),
 			$user->display_name,
 			get_bloginfo( 'name' )
