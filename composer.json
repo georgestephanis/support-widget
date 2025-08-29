@@ -1,0 +1,34 @@
+{
+	"require-dev": {
+		"php": ">=8.3",
+		"ext-json": "*",
+		"composer/composer": "^2",
+		"wp-coding-standards/wpcs": "^3",
+    	"phpcompatibility/phpcompatibility-wp": "*",
+		"johnbillion/wp-compat": "^1",
+		"wp-cli/i18n-command": "^2.6",
+		"roave/security-advisories": "dev-latest"
+	},
+	"config": {
+		"allow-plugins": {
+			"composer/*": true,
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	},
+
+	"scripts": {
+		"format": "phpcbf --standard=./.phpcs.xml . -v",
+		"lint": "phpcs --standard=./.phpcs.xml . -v",
+		"internationalize": [
+			"@makepot:contact-form",
+			"@updatepo:contact-form"
+		],
+		"makepot:contact-form": "wp i18n make-pot",
+		"updatepo:contact-form": "wp i18n update-po languages/contact-form.pot",
+		"packages-install": "@composer install --ignore-platform-reqs --no-interaction",
+		"packages-update": [
+			"@composer clear-cache",
+			"@composer update --prefer-stable --ignore-platform-reqs --no-interaction"
+		]
+	}
+}
