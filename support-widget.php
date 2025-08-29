@@ -20,8 +20,7 @@ function setup_widget() {
     wp_add_dashboard_widget(
 		'gs_support-widget',
 		__( 'Support', 'support-widget' ),
-		__NAMESPACE__ . '\widget',
-		__NAMESPACE__ . '\widget_control'
+		__NAMESPACE__ . '\widget'
 	);
 
 
@@ -119,10 +118,6 @@ function widget() {
 		?>
 	</form>
 	<?php
-}
-
-function widget_control() {
-	_e( 'Control Options...', 'support-widget' );
 }
 
 function get_active_plugins() {
