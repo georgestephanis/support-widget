@@ -18,7 +18,7 @@ namespace GeorgeStephanis\SupportWidget;
 
 function setup_widget() {
     wp_add_dashboard_widget(
-		'gs_support-widget',
+		'gs_support_widget',
 		__( 'Support', 'support-widget' ),
 		__NAMESPACE__ . '\widget'
 	);
@@ -62,7 +62,7 @@ function get_to_options() {
 		),
 	);
 
-	$to_options = apply_filters( 'gs_support_widget-to_options', $to_options );
+	$to_options = apply_filters( 'gs_support_widget_to_options', $to_options );
 
 	foreach ( $to_options as $slug => $details ) {
 		// If there's a capability specified, and the user doesn't have it, don't let them use that recipient.
@@ -79,7 +79,7 @@ function get_to_options() {
  */
 function widget() {
 	$to_options = get_to_options();
-	$default_to = apply_filters( 'gs_support_widget-default_to', null );
+	$default_to = apply_filters( 'gs_support_widget_default_to', null );
 	?>
 	<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post">
 		<input type="hidden" name="action" value="gs_contact-support" />
@@ -129,7 +129,7 @@ function widget() {
 			<input type="checkbox" name="extra_data" value="true" checked />
 			<?php esc_html_e( 'Submit extra diagnostic data?', 'support-widget' ); ?>
 		</label>
-		<input type="hidden" name="client" id="gs_support-widget__client" />
+		<input type="hidden" name="client" id="gs_support_widget__client" />
 		<?php
 		submit_button(
 			esc_html__( 'Send', 'support-widget' )

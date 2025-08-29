@@ -8,4 +8,4 @@ const clientData = {
     tzOffset: new Date().getTimezoneOffset(),
 };
 
-document.getElementById( 'gs_support-widget__client' ).value = JSON.stringify( clientData );
+document.getElementById( 'gs_support_widget__client' ).value = JSON.stringify( clientData );
