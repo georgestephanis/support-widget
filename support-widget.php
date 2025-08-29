@@ -43,19 +43,35 @@ function setup_widget() {
 }
 add_action( 'wp_dashboard_setup', __NAMESPACE__ . '\setup_widget' );
 
+/**
+ * Get a list of the available recipients for support messages.
+ *
+ * @return array The available options, restricted by capability checks.
+ */
 function get_to_options() {
-	$to = array(
+	$to_options = array(
 		'admin' => array(
 			'label' => __( 'Site Admin', 'support-widget' ),
 			'to'    => get_option( 'admin_email' ),
+			'cap'   => 'edit_posts',
 		),
 		'george' => array(
 			'label' => __( 'George', 'support-widget' ),
 			'to'    => 'daljo628@gmail.com',
-		)
+			'cap'   => 'do_not_allow',
+		),
 	);
 
-	return $to;
+	$to_options = apply_filters( 'gs_support_widget-to_options', $to_options );
+
+	foreach ( $to_options as $slug => $details ) {
+		// If there's a capability specified, and the user doesn't have it, don't let them use that recipient.
+		if ( ! empty( $details['cap'] ) && ! current_user_can( $details['cap'] ) ) {
+			unset( $to_options[ $slug ] );
+		}
+	}
+
+	return $to_options;
 }
 
 function widget() {
