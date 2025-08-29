@@ -20,11 +20,9 @@
 		"format": "phpcbf --standard=./.phpcs.xml . -v",
 		"lint": "phpcs --standard=./.phpcs.xml . -v",
 		"internationalize": [
-			"@makepot:contact-form",
-			"@updatepo:contact-form"
+			"wp i18n make-pot .",
+			"wp i18n update-po languages/support-widget.pot"
 		],
-		"makepot:contact-form": "wp i18n make-pot",
-		"updatepo:contact-form": "wp i18n update-po languages/contact-form.pot",
 		"packages-install": "@composer install --ignore-platform-reqs --no-interaction",
 		"packages-update": [
 			"@composer clear-cache",
