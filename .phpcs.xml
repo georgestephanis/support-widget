@@ -69,6 +69,7 @@
 			<property name="prefixes" type="array">
 				<element value="gs_"/>
 				<element value="gs_support_widget"/>
+				<element value="GeorgeStephanis"/>
 			</property>
 		</properties>
 	</rule>

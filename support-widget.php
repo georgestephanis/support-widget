@@ -22,14 +22,13 @@ namespace GeorgeStephanis\SupportWidget;
  * @return void
  */
 function setup_widget() {
-    wp_add_dashboard_widget(
+	wp_add_dashboard_widget(
 		'gs_support_widget',
 		__( 'Support', 'support-widget' ),
 		__NAMESPACE__ . '\widget'
 	);
 
-
-	$asset_file = include( plugin_dir_path( __FILE__ ) . 'build/index.asset.php');
+	$asset_file = include plugin_dir_path( __FILE__ ) . 'build/index.asset.php';
 
 	wp_enqueue_style(
 		'support-widget',
@@ -55,7 +54,7 @@ add_action( 'wp_dashboard_setup', __NAMESPACE__ . '\setup_widget' );
  */
 function get_to_options() {
 	$to_options = array(
-		'admin' => array(
+		'admin'  => array(
 			'label' => __( 'Site Admin', 'support-widget' ),
 			'to'    => get_option( 'admin_email' ),
 			'cap'   => 'edit_posts',
@@ -94,7 +93,7 @@ function widget() {
 		<label>
 			<?php esc_html_e( 'To:', 'support-widget' ); ?>
 			<?php
-			if ( sizeof( $to_options ) < 2 ) {
+			if ( count( $to_options ) < 2 ) {
 				$to_key     = key( $to_options );
 				$to_details = current( $to_options );
 
@@ -176,28 +175,30 @@ function get_active_plugins() {
  * @return array
  */
 function get_extra_diagnostic_data() {
+	check_admin_referer( 'gs_contact-support', '_supportnonce' );
+
 	$return = array(
 		'client' => array(),
 		'server' => array(),
 	);
 
 	// Client Data:
-	$return['client']                   = isset( $_POST['client'] ) ? json_decode( $_POST['client'] ) : array();
-	$return['client']['user-agent']     = $_SERVER['HTTP_USER_AGENT'] ?? __( 'Unknown', 'support-widget' );
-	$return['client']['remote-addr']    = $_SERVER['REMOTE_ADDR'] ?? __( 'Unknown', 'support-widget' );
-	$return['client']['remote-host']    = $_SERVER['REMOTE_HOST'] ?? __( 'Unknown', 'support-widget' );
+	$return['client']                = isset( $_POST['client'] ) ? json_decode( $_POST['client'] ) : array();
+	$return['client']['user-agent']  = $_SERVER['HTTP_USER_AGENT'] ?? __( 'Unknown', 'support-widget' );
+	$return['client']['remote-addr'] = $_SERVER['REMOTE_ADDR'] ?? __( 'Unknown', 'support-widget' );
+	$return['client']['remote-host'] = $_SERVER['REMOTE_HOST'] ?? __( 'Unknown', 'support-widget' );
 
 	// Server Data:
-	$return['server']['wpurl']          = get_bloginfo( 'wpurl' );
-	$return['server']['wp-version']     = get_bloginfo( 'version' );
-	$return['server']['php-version']    = PHP_VERSION;
-	$return['server']['os']             = $_SERVER['SERVER_SIGNATURE'] ?? __( 'Unknown', 'support-widget' );
-	$return['server']['is-https']       = is_ssl() ? 'https' : 'http';
-	$return['server']['language']       = get_bloginfo( 'language' );
-	$return['server']['charset']        = get_bloginfo( 'charset' );
-	$return['server']['is-multisite']   = is_multisite() ? 'multisite' : 'singlesite';
-	$return['server']['stylesheet']     = get_bloginfo( 'stylesheet_url' );
-	$return['server']['plugins']        = implode( ', ', get_active_plugins() );
+	$return['server']['wpurl']        = get_bloginfo( 'wpurl' );
+	$return['server']['wp-version']   = get_bloginfo( 'version' );
+	$return['server']['php-version']  = PHP_VERSION;
+	$return['server']['os']           = $_SERVER['SERVER_SIGNATURE'] ?? __( 'Unknown', 'support-widget' );
+	$return['server']['is-https']     = is_ssl() ? 'https' : 'http';
+	$return['server']['language']     = get_bloginfo( 'language' );
+	$return['server']['charset']      = get_bloginfo( 'charset' );
+	$return['server']['is-multisite'] = is_multisite() ? 'multisite' : 'singlesite';
+	$return['server']['stylesheet']   = get_bloginfo( 'stylesheet_url' );
+	$return['server']['plugins']      = implode( ', ', get_active_plugins() );
 	if ( function_exists( 'get_mu_plugins' ) ) {
 		$return['server']['mu-plugins'] = implode( ', ', array_keys( get_mu_plugins() ) );
 	}
@@ -228,7 +229,7 @@ function send_support_request() {
 
 	$user = wp_get_current_user();
 
-	$to = null;
+	$to         = null;
 	$to_options = get_to_options();
 	if ( isset( $to_options[ $_POST['to'] ] ) ) {
 		$to = $to_options[ $_POST['to'] ];
@@ -254,7 +255,6 @@ function send_support_request() {
 			$body .= '<tr><th scope="row">' . esc_html( $key ) . '</th><td>' . esc_html( $value ) . '</td></tr>' . "\r\n";
 		}
 		$body .= '</tbody></table>' . "\r\n\r\n";
-
 	}
 
 	switch ( $_POST['priority'] ) {
@@ -277,6 +277,7 @@ function send_support_request() {
 	wp_mail(
 		sprintf( '%2$s', $to['label'], $to['to'] ),
 		sprintf(
+			// Translators: 1: Priority level, 2: display name, 3: site title
 			__( '%1$s-Priority Support Request from %2$s at %3$s!', 'support-widget' ),
 			ucwords( $_POST['priority'] ),
 			$user->display_name,
@@ -285,7 +286,6 @@ function send_support_request() {
 		$body,
 		array(
 			sprintf( 'Reply-To: %2$s', $user->display_name, $user->email ),
-		//	'Content-type: text/plain',
 			'Content-Type: text/html; charset=UTF-8',
 			sprintf( 'X-Priority: %d', $priority ),
 		)
