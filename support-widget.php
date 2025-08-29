@@ -16,6 +16,11 @@
 
 namespace GeorgeStephanis\SupportWidget;
 
+/**
+ * Initialization.  Add the dashboard widget, and enqueue the styles and scripts.
+ *
+ * @return void
+ */
 function setup_widget() {
     wp_add_dashboard_widget(
 		'gs_support_widget',
@@ -76,6 +81,8 @@ function get_to_options() {
 
 /**
  * The dashboard widget itself.
+ *
+ * @return void
  */
 function widget() {
 	$to_options = get_to_options();
@@ -139,6 +146,13 @@ function widget() {
 	<?php
 }
 
+/**
+ * Get all the active plugins, including network activated.  For debugging data.
+ *
+ * Loosely based on a prior implementation I'd done in Jetpack.
+ *
+ * @return array
+ */
 function get_active_plugins() {
 	$active_plugins = (array) get_option( 'active_plugins', array() );
 
@@ -204,6 +218,11 @@ function get_extra_diagnostic_data() {
 	return $return;
 }
 
+/**
+ * Send the email for a support request.
+ *
+ * @return void
+ */
 function send_support_request() {
 	check_admin_referer( 'gs_contact-support', '_supportnonce' );
 
@@ -219,10 +238,23 @@ function send_support_request() {
 		return;
 	}
 
-	$body = $_POST['message'];
+	$body = '<pre>' . $_POST['message'] . '</pre>' . "\r\n\r\n";
 
 	if ( ! empty( $_POST['extra_data'] ) ) {
-		$body .= "\r\n\r\n" . print_r( get_extra_diagnostic_data(), true );
+		$extra = get_extra_diagnostic_data();
+
+		$body .= '<h4>' . esc_html__( 'Extra Diagnostic Data:', 'support-widget' ) . '</h4>' . "\r\n";
+		$body .= '<table><tbody>' . "\r\n";
+		$body .= '<tr><th scope="col" colspan="2">' . esc_html__( 'Client Data', 'support-widget' ) . '</th></tr>' . "\r\n";
+		foreach ( $extra['client'] as $key => $value ) {
+			$body .= '<tr><th scope="row">' . esc_html( $key ) . '</th><td>' . esc_html( $value ) . '</td></tr>' . "\r\n";
+		}
+		$body .= '<tr><th scope="col" colspan="2">' . esc_html__( 'Server Data', 'support-widget' ) . '</th></tr>' . "\r\n";
+		foreach ( $extra['server'] as $key => $value ) {
+			$body .= '<tr><th scope="row">' . esc_html( $key ) . '</th><td>' . esc_html( $value ) . '</td></tr>' . "\r\n";
+		}
+		$body .= '</tbody></table>' . "\r\n\r\n";
+
 	}
 
 	switch ( $_POST['priority'] ) {
@@ -253,7 +285,8 @@ function send_support_request() {
 		$body,
 		array(
 			sprintf( 'Reply-To: %2$s', $user->display_name, $user->email ),
-			'Content-type: text/plain',
+		//	'Content-type: text/plain',
+			'Content-Type: text/html; charset=UTF-8',
 			sprintf( 'X-Priority: %d', $priority ),
 		)
 	);
