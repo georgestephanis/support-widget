@@ -74,9 +74,12 @@ function get_to_options() {
 	return $to_options;
 }
 
+/**
+ * The dashboard widget itself.
+ */
 function widget() {
 	$to_options = get_to_options();
-	$default_to = 'george';
+	$default_to = apply_filters( 'gs_support_widget-default_to', null );
 	?>
 	<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post">
 		<input type="hidden" name="action" value="gs_contact-support" />
